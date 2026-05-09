@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eralean Finance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; background: #FFFFFF; color: #0F0F0F; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  input, select, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; background: #F5F7FA; border-right: 1px solid #E5E7EB; padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
+  .brand { display: flex; align-items: center; padding: 8px 12px; font-size: 22px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .brand-name { color: #0F172A; }
+  .brand-dot { color: #0070BA; margin: 0 4px; font-weight: 800; }
+  .brand-tag { color: #475569; font-weight: 500; letter-spacing: -0.02em; }
+  .create-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 999px; background: #0F0F0F; color: #FFFFFF; font-weight: 600; font-size: 14px; align-self: flex-start; min-width: 130px; transition: transform 0.1s; }
+  .create-btn:hover { transform: translateY(-1px); }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #0F0F0F; font-size: 14px; font-weight: 500; width: 100%; text-align: left; transition: background 0.15s; }
+  .nav-item:hover:not(.active) { background: #ECEEF1; }
+  .nav-item.active { background: #DBEAFE; color: #0070BA; }
+  .nav-item.active svg { color: #0070BA; }
+  .nav-item svg { color: #0F0F0F; flex-shrink: 0; }
+  .nav-item span { flex: 1; }
+  .nav-item .chevron { color: #9CA3AF; }
+  .nav-item.active .chevron { color: #0070BA; }
+
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid #F0F2F5; }
+  .business-name { font-size: 18px; font-weight: 600; }
+  .top-right { display: flex; align-items: center; gap: 8px; position: relative; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #0070BA; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; cursor: pointer; transition: transform 0.1s; }
+  .avatar:hover { transform: scale(1.05); }
+  .avatar-menu { position: absolute; top: 48px; right: 0; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); padding: 8px; min-width: 220px; z-index: 50; }
+  .avatar-menu-info { padding: 12px; border-bottom: 1px solid #F0F2F5; margin-bottom: 4px; }
+  .avatar-menu-name { font-size: 14px; font-weight: 600; color: #0F0F0F; }
+  .avatar-menu-email { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .avatar-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #0F0F0F; width: 100%; text-align: left; transition: background 0.15s; }
+  .avatar-menu-item:hover { background: #F5F7FA; }
+  .avatar-menu-item.danger { color: #B91C1C; }
+  .avatar-menu-item.danger:hover { background: #FEF2F2; }
+
+  .content { padding: 32px 40px; max-width: 1400px; width: 100%; }
+
+  .balance-wrap { margin-bottom: 32px; }
+  .balance-line { display: flex; align-items: baseline; gap: 8px; }
+  .balance-big { font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .balance-currency { font-size: 16px; font-weight: 500; color: #6B7280; }
+  .balance-label { font-size: 14px; color: #6B7280; margin-top: 8px; }
+  .period-picker { display: flex; gap: 8px; margin-top: 16px; }
+  .period-select { padding: 8px 16px; border-radius: 999px; border: 1px solid #E5E7EB; background: #FFFFFF; font-size: 14px; font-weight: 500; color: #0F0F0F; cursor: pointer; outline: none; }
+  .period-select:focus { border-color: #0070BA; }
+
+  .cards-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .summary-card { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; transition: border-color 0.15s; }
+  .summary-card:hover { border-color: #D1D5DB; }
+  .summary-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .icon-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .summary-label { font-size: 13px; color: #6B7280; font-weight: 500; }
+  .summary-value { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .summary-sub { font-size: 12px; color: #6B7280; margin-bottom: 12px; }
+  .summary-cta { display: inline-flex; align-items: center; gap: 6px; color: #0070BA; font-size: 13px; font-weight: 600; }
+  .summary-cta:hover { text-decoration: underline; }
+  .breakdown-line { display: flex; justify-content: space-between; font-size: 12px; color: #6B7280; margin-top: 4px; }
+  .breakdown-line strong { font-weight: 600; color: #0F0F0F; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .section { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 600; }
+
+  .category-list { display: flex; flex-direction: column; gap: 14px; }
+  .category-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .category-name { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .category-amount { font-size: 13px; font-weight: 600; }
+  .category-pct { font-size: 12px; color: #6B7280; margin-left: 8px; }
+  .bar-bg { height: 6px; background: #F0F2F5; border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+  .mini-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .mini-stat { padding: 14px 16px; background: #F8F9FB; border-radius: 8px; border: 1px solid #F0F2F5; }
+  .mini-label { font-size: 12px; color: #6B7280; margin-bottom: 6px; }
+  .mini-value { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+
+  .activity-table { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; }
+  .activity-header { display: flex; padding: 14px 20px; background: #F8F9FB; border-bottom: 1px solid #E5E7EB; font-size: 12px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em; }
+  .activity-row { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid #F0F2F5; font-size: 14px; transition: background 0.1s; }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-row:hover { background: #FAFBFC; }
+  .empty-state { padding: 40px; text-align: center; color: #9CA3AF; font-size: 14px; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-regular { background: #EFF6FF; color: #1546A0; }
+  .badge-extra { background: #FEF3C7; color: #92400E; }
+  .category-tag { display: inline-block; padding: 4px 10px; background: #F0F2F5; color: #0F0F0F; border-radius: 4px; font-size: 12px; font-weight: 500; }
+  .row-actions { display: flex; justify-content: flex-end; gap: 4px; }
+  .row-action { padding: 6px; border-radius: 6px; color: #6B7280; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+  .row-action:hover { background: #F0F2F5; color: #0F0F0F; }
+
+  .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .list-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .list-subtitle { font-size: 14px; color: #6B7280; margin-top: 4px; }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .filter-pill { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; background: #F5F7FA; color: #6B7280; transition: all 0.15s; }
+  .filter-pill:hover { background: #ECEEF1; }
+  .filter-pill.active { background: #0F0F0F; color: #FFFFFF; }
+
+  .primary-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; background: #0F0F0F; color: #FFFFFF; border-radius: 999px; font-size: 14px; font-weight: 600; transition: transform 0.1s; }
+  .primary-btn:hover { transform: translateY(-1px); }
+  .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .secondary-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #FFFFFF; color: #0F0F0F; border: 1px solid #E5E7EB; border-radius: 999px; font-size: 14px; font-weight: 600; }
+  .secondary-btn:hover { background: #F5F7FA; }
+
+  .toggle-pill { display: flex; background: #F5F7FA; border-radius: 999px; padding: 4px; width: 100%; }
+  .toggle-option { flex: 1; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; color: #6B7280; transition: all 0.15s; }
+  .toggle-option.active { background: #FFFFFF; color: #0F0F0F; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(15, 15, 15, 0.4); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+  .modal { background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 480px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid #F0F2F5; display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-body { padding: 24px; overflow-y: auto; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid #F0F2F5; display: flex; justify-content: flex-end; gap: 8px; }
+  .field { margin-bottom: 16px; }
+  .field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .input { width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 14px; color: #0F0F0F; background: #FFFFFF; outline: none; transition: border-color 0.15s; }
+  .input:focus { border-color: #0070BA; }
+  textarea.input { min-height: 60px; resize: vertical; }
+  .icon-btn { padding: 8px; border-radius: 8px; color: #0F0F0F; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+  .icon-btn:hover { background: #F5F7FA; }
+
+  .save-indicator { position: fixed; bottom: 20px; right: 20px; background: #0F0F0F; color: #FFFFFF; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; opacity: 0; transform: translateY(10px); transition: opacity 0.2s, transform 0.2s; pointer-events: none; z-index: 100; }
+  .save-indicator.show { opacity: 1; transform: translateY(0); }
+  .save-indicator.error { background: #B91C1C; }
+
+  .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #F8FAFC; padding: 20px; }
+  .auth-card { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .auth-brand { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+  .auth-title { font-size: 22px; font-weight: 700; color: #0F0F0F; text-align: center; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .auth-subtitle { font-size: 14px; color: #6B7280; text-align: center; margin-bottom: 28px; }
+  .auth-error { background: #FEF2F2; color: #B91C1C; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; border: 1px solid #FECACA; }
+  .auth-switch { text-align: center; font-size: 14px; color: #6B7280; margin-top: 20px; }
+  .auth-switch a { color: #0070BA; font-weight: 600; cursor: pointer; }
+  .auth-switch a:hover { text-decoration: underline; }
+  .auth-btn { width: 100%; padding: 12px 20px; background: #0F0F0F; color: #FFFFFF; border-radius: 999px; font-size: 14px; font-weight: 600; transition: opacity 0.15s; }
+  .auth-btn:hover:not(:disabled) { opacity: 0.9; }
+  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .loading-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; background: #FFFFFF; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #E5E7EB; border-top-color: #0070BA; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: #6B7280; }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 80px; padding: 16px 8px; }
+    .sidebar .brand, .sidebar .create-btn span, .sidebar .nav-item span, .sidebar .nav-item .chevron { display: none; }
+    .sidebar .create-btn { min-width: auto; padding: 12px; }
+    .sidebar .nav-item { justify-content: center; }
+    .topbar { padding: 16px 20px; }
+    .content { padding: 20px; }
+    .balance-big { font-size: 40px; }
+    .cards-row { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .mini-row { grid-template-columns: repeat(2, 1fr); }
+    .auth-card { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="loading-screen"><div class="spinner"></div><div class="loading-text">Yükleniyor...</div></div>
+</div>
+<div id="save-indicator" class="save-indicator">✓ Kaydedildi</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://kplkonbhuzqwzxsobjvx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwbGtvbmJodXpxd3p4c29ianZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4ODQyNTcsImV4cCI6MjA5MzQ2MDI1N30.K6x-DQxSTV9nWqHuxhfVfulijjSjJM-dfyHeu5kxB18';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const icons = {
+  home: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  activity: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  receipt: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>',
+  building: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/></svg>',
+  piggy: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a6.5 6.5 0 0 0 1.5-7"/><path d="M16.5 11A4.5 4.5 0 1 0 12 6.5"/><path d="M2 14h2a2 2 0 1 1 0 4H2v-4Z"/><path d="M5 7h2"/></svg>',
+  user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  logout: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+  plus: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  plusBig: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+  x: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  arrowDown: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10"/><path d="M17 7v10H7"/></svg>',
+  arrowUp: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>',
+  wallet: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>',
+  edit: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>',
+  trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+};
+
+const INCOME_CATEGORIES = ['Maaş', 'Recurring Client', 'One-off', 'Diğer Gelir'];
+const EXPENSE_CATEGORIES = ['Kira', 'Personal Allowance', 'Business Tools', 'Ad Spend', 'Borç Ödemesi', 'Diğer Gider'];
+const INVESTMENT_TYPES = ['Stock', 'Crypto', 'Cash Savings', 'ETF / Fund', 'Other'];
+const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+let session = null;
+let profile = null;
+let state = { income: [], expenses: [], debts: [], investments: [] };
+let view = 'home';
+let period = { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
+let modal = null;
+let listFilter = 'all';
+let avatarMenuOpen = false;
+let authMode = 'login';
+let authError = '';
+let authLoading = false;
+let isLoading = true;
+
+function fmt(n) { return '£' + (Number(n) || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtBig(n) { return '£' + (Number(n) || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function escapeHtml(str) { if (str == null) return ''; return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
+let saveTimer;
+function showIndicator(text = '✓ Kaydedildi', isError = false) {
+  const el = document.getElementById('save-indicator');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle('error', isError);
+  el.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+function rowToTransaction(r) { return { id: r.id, date: r.date, description: r.description, category: r.category, amount: parseFloat(r.amount), kind: r.kind, notes: r.notes || '' }; }
+function rowToDebt(r) { return { id: r.id, name: r.name, creditor: r.creditor || '', original: parseFloat(r.original_amount), paid: parseFloat(r.paid_amount), monthlyPayment: parseFloat(r.monthly_payment), notes: r.notes || '' }; }
+function rowToInvestment(r) { return { id: r.id, name: r.name, type: r.type, contributed: parseFloat(r.contributed), balance: parseFloat(r.balance), notes: r.notes || '' }; }
+
+async function loadAllData() {
+  if (!session) return;
+  try {
+    const [txRes, debtRes, invRes, profRes] = await Promise.all([
+      sb.from('transactions').select('*').order('date', { ascending: false }),
+      sb.from('debts').select('*').order('created_at', { ascending: false }),
+      sb.from('investments').select('*').order('created_at', { ascending: false }),
+      sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
+    ]);
+    if (txRes.error) throw txRes.error;
+    if (debtRes.error) throw debtRes.error;
+    if (invRes.error) throw invRes.error;
+    state.income = (txRes.data || []).filter(t => t.type === 'income').map(rowToTransaction);
+    state.expenses = (txRes.data || []).filter(t => t.type === 'expense').map(rowToTransaction);
+    state.debts = (debtRes.data || []).map(rowToDebt);
+    state.investments = (invRes.data || []).map(rowToInvestment);
+    profile = profRes.data || { full_name: '', currency: 'GBP' };
+  } catch (e) {
+    console.error('Load error:', e);
+    showIndicator('Veri yüklenemedi: ' + e.message, true);
+  }
+}
+
+async function saveTransaction(item, type, existingId = null) {
+  const payload = { user_id: session.user.id, type, kind: item.kind || 'regular', date: item.date, description: item.description, category: item.category, amount: item.amount, notes: item.notes || null };
+  if (existingId) {
+    const { data, error } = await sb.from('transactions').update(payload).eq('id', existingId).select().single();
+    if (error) throw error;
+    return rowToTransaction(data);
+  }
+  const { data, error } = await sb.from('transactions').insert(payload).select().single();
+  if (error) throw error;
+  return rowToTransaction(data);
+}
+
+async function saveDebt(item, existingId = null) {
+  const payload = { user_id: session.user.id, name: item.name, creditor: item.creditor || null, original_amount: item.original, paid_amount: item.paid, monthly_payment: item.monthlyPayment, notes: item.notes || null };
+  if (existingId) {
+    const { data, error } = await sb.from('debts').update(payload).eq('id', existingId).select().single();
+    if (error) throw error;
+    return rowToDebt(data);
+  }
+  const { data, error } = await sb.from('debts').insert(payload).select().single();
+  if (error) throw error;
+  return rowToDebt(data);
+}
+
+async function saveInvestment(item, existingId = null) {
+  const payload = { user_id: session.user.id, name: item.name, type: item.type, contributed: item.contributed, balance: item.balance, notes: item.notes || null };
+  if (existingId) {
+    const { data, error } = await sb.from('investments').update(payload).eq('id', existingId).select().single();
+    if (error) throw error;
+    return rowToInvestment(data);
+  }
+  const { data, error } = await sb.from('investments').insert(payload).select().single();
+  if (error) throw error;
+  return rowToInvestment(data);
+}
+
+async function deleteRow(table, id) {
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) throw error;
+}
+
+async function signUp(email, password, fullName) {
+  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+  if (error) throw error;
+  return data;
+}
+async function signIn(email, password) {
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
+}
+async function signOut() {
+  await sb.auth.signOut();
+  session = null; profile = null; state = { income: [], expenses: [], debts: [], investments: [] };
+  view = 'home'; avatarMenuOpen = false;
+  render();
+}
+
+function render() {
+  const root = document.getElementById('root');
+  if (isLoading) { root.innerHTML = `<div class="loading-screen"><div class="spinner"></div><div class="loading-text">Yükleniyor...</div></div>`; return; }
+  if (!session) { root.innerHTML = renderAuth(); attachAuthEvents(); return; }
+  root.innerHTML = `
+    <div class="app">${renderSidebar()}<main class="main">${renderTopbar()}
+    ${view === 'home' ? renderHome() : ''}
+    ${view === 'income' ? renderList('income') : ''}
+    ${view === 'expenses' ? renderList('expense') : ''}
+    ${view === 'debts' ? renderDebts() : ''}
+    ${view === 'investments' ? renderInvestments() : ''}
+    ${view === 'profile' ? renderProfile() : ''}
+    </main></div>${modal ? renderModal() : ''}`;
+  attachEvents();
+}
+
+function renderAuth() {
+  const isLogin = authMode === 'login';
+  return `
+    <div class="auth-page">
+      <div class="auth-card">
+        <div class="auth-brand"><span style="color:#0F172A">Eralean</span><span style="color:#0070BA; margin:0 4px">·</span><span style="color:#475569; font-weight:500">Finance</span></div>
+        <h1 class="auth-title">${isLogin ? 'Hoş geldin' : 'Hesap oluştur'}</h1>
+        <p class="auth-subtitle">${isLogin ? 'Hesabına giriş yap' : 'Birkaç saniyede başla'}</p>
+        ${authError ? `<div class="auth-error">${escapeHtml(authError)}</div>` : ''}
+        <form id="auth-form" onsubmit="event.preventDefault(); submitAuth();">
+          ${!isLogin ? `<div class="field"><label class="field-label">İsim</label><input type="text" class="input" name="fullName" placeholder="Asaf Aksoy" required /></div>` : ''}
+          <div class="field"><label class="field-label">Email</label><input type="email" class="input" name="email" placeholder="you@example.com" required autofocus /></div>
+          <div class="field"><label class="field-label">Şifre</label><input type="password" class="input" name="password" placeholder="${isLogin ? 'Şifren' : 'En az 6 karakter'}" minlength="6" required /></div>
+          <button type="submit" class="auth-btn" ${authLoading ? 'disabled' : ''}>${authLoading ? 'Lütfen bekle...' : (isLogin ? 'Giriş yap' : 'Kayıt ol')}</button>
+        </form>
+        <div class="auth-switch">${isLogin ? 'Hesabın yok mu? ' : 'Hesabın var mı? '}<a data-action="switch-auth">${isLogin ? 'Kayıt ol' : 'Giriş yap'}</a></div>
+      </div>
+    </div>`;
+}
+
+function renderSidebar() {
+  const items = [
+    { key: 'home', label: 'Home', icon: icons.home },
+    { key: 'income', label: 'Gelirler', icon: icons.activity, hasChevron: true },
+    { key: 'expenses', label: 'Giderler', icon: icons.receipt, hasChevron: true },
+    { key: 'debts', label: 'Borçlar', icon: icons.building, hasChevron: true },
+    { key: 'investments', label: 'Yatırım', icon: icons.piggy, hasChevron: true },
+  ];
+  return `<aside class="sidebar">
+    <div class="brand"><span class="brand-name">Eralean</span><span class="brand-dot">·</span><span class="brand-tag">Finance</span></div>
+    <button class="create-btn" data-action="open-create">${icons.plusBig}<span>Create</span></button>
+    <nav class="nav">${items.map(it => `<button class="nav-item ${view === it.key ? 'active' : ''}" data-view="${it.key}">${it.icon}<span>${it.label}</span>${it.hasChevron ? `<span class="chevron">${icons.chevron}</span>` : ''}</button>`).join('')}</nav>
+  </aside>`;
+}
+
+function getInitials(name) {
+  if (!name) return 'U';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function renderTopbar() {
+  const name = profile?.full_name || session?.user?.email || 'Kullanıcı';
+  const email = session?.user?.email || '';
+  const initials = getInitials(profile?.full_name || email);
+  return `<header class="topbar">
+    <h1 class="business-name">${escapeHtml(name)}</h1>
+    <div class="top-right">
+      <div class="avatar" data-action="toggle-avatar-menu">${initials}</div>
+      ${avatarMenuOpen ? `<div class="avatar-menu">
+        <div class="avatar-menu-info"><div class="avatar-menu-name">${escapeHtml(name)}</div><div class="avatar-menu-email">${escapeHtml(email)}</div></div>
+        <button class="avatar-menu-item" data-action="open-profile">${icons.user}<span>Profil</span></button>
+        <button class="avatar-menu-item danger" data-action="logout">${icons.logout}<span>Çıkış yap</span></button>
+      </div>` : ''}
+    </div>
+  </header>`;
+}
+
+function getPeriodData() {
+  const periodIncome = state.income.filter(i => { const d = new Date(i.date); return d.getMonth() + 1 === period.month && d.getFullYear() === period.year; });
+  const periodExpenses = state.expenses.filter(e => { const d = new Date(e.date); return d.getMonth() + 1 === period.month && d.getFullYear() === period.year; });
+  const totalIncome = periodIncome.reduce((s, x) => s + x.amount, 0);
+  const totalExpense = periodExpenses.reduce((s, x) => s + x.amount, 0);
+  const regularIncome = periodIncome.filter(x => (x.kind || 'regular') === 'regular').reduce((s, x) => s + x.amount, 0);
+  const extraIncome = periodIncome.filter(x => x.kind === 'extra').reduce((s, x) => s + x.amount, 0);
+  const regularExpense = periodExpenses.filter(x => (x.kind || 'regular') === 'regular').reduce((s, x) => s + x.amount, 0);
+  const extraExpense = periodExpenses.filter(x => x.kind === 'extra').reduce((s, x) => s + x.amount, 0);
+  return { periodIncome, periodExpenses, totalIncome, totalExpense, regularIncome, extraIncome, regularExpense, extraExpense, net: totalIncome - totalExpense };
+}
+
+function renderHome() {
+  const p = getPeriodData();
+  const incomeByCategory = {};
+  INCOME_CATEGORIES.forEach(c => incomeByCategory[c] = { total: 0, regular: 0, extra: 0 });
+  p.periodIncome.forEach(i => { if (!incomeByCategory[i.category]) incomeByCategory[i.category] = { total: 0, regular: 0, extra: 0 }; incomeByCategory[i.category].total += i.amount; incomeByCategory[i.category][i.kind || 'regular'] += i.amount; });
+  const expenseByCategory = {};
+  EXPENSE_CATEGORIES.forEach(c => expenseByCategory[c] = { total: 0, regular: 0, extra: 0 });
+  p.periodExpenses.forEach(e => { if (!expenseByCategory[e.category]) expenseByCategory[e.category] = { total: 0, regular: 0, extra: 0 }; expenseByCategory[e.category].total += e.amount; expenseByCategory[e.category][e.kind || 'regular'] += e.amount; });
+  const totalDebt = state.debts.reduce((s, d) => s + (d.original - d.paid), 0);
+  const totalInvestment = state.investments.reduce((s, i) => s + (i.balance || 0), 0);
+  const netWorth = totalInvestment - totalDebt;
+  const recent = [...state.income.map(x => ({ ...x, type: 'income' })), ...state.expenses.map(x => ({ ...x, type: 'expense' }))].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+  return `<div class="content">
+    <div class="balance-wrap">
+      <div class="balance-line"><span class="balance-big">${fmtBig(p.net)}</span><span class="balance-currency">GBP</span></div>
+      <div class="balance-label">Net (Bu ay elime geçen)</div>
+      <div class="period-picker">
+        <select class="period-select" data-period="month">${MONTHS.map((m, i) => `<option value="${i + 1}" ${period.month === i + 1 ? 'selected' : ''}>${m}</option>`).join('')}</select>
+        <select class="period-select" data-period="year">${[2025, 2026, 2027, 2028].map(y => `<option value="${y}" ${period.year === y ? 'selected' : ''}>${y}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="cards-row">
+      <div class="summary-card"><div class="summary-top"><div class="icon-circle" style="background:#E6F4EA; color:#117A39">${icons.arrowDown}</div><span class="summary-label">Gelir</span></div><div class="summary-value">${fmt(p.totalIncome)}</div><div class="summary-sub">${p.periodIncome.length} işlem</div><div class="breakdown-line"><span>Sabit</span><strong>${fmt(p.regularIncome)}</strong></div><div class="breakdown-line"><span>Ekstra</span><strong>${fmt(p.extraIncome)}</strong></div></div>
+      <div class="summary-card"><div class="summary-top"><div class="icon-circle" style="background:#FCE9E9; color:#B91C1C">${icons.arrowUp}</div><span class="summary-label">Gider</span></div><div class="summary-value">${fmt(p.totalExpense)}</div><div class="summary-sub">${p.periodExpenses.length} işlem</div><div class="breakdown-line"><span>Sabit</span><strong>${fmt(p.regularExpense)}</strong></div><div class="breakdown-line"><span>Ekstra</span><strong>${fmt(p.extraExpense)}</strong></div></div>
+      <div class="summary-card"><div class="summary-top"><div class="icon-circle" style="background:#E6EFFB; color:#1546A0">${icons.wallet}</div><span class="summary-label">Net Kâr</span></div><div class="summary-value" style="color:${p.net >= 0 ? '#117A39' : '#B91C1C'}">${fmt(p.net)}</div><div class="summary-sub">${p.net >= 0 ? 'Artıdasın' : 'Eksidesin'}</div><div class="breakdown-line"><span>Toplam Borç</span><strong style="color:#B91C1C">${fmtBig(totalDebt)}</strong></div><div class="breakdown-line"><span>Yatırım</span><strong style="color:#117A39">${fmtBig(totalInvestment)}</strong></div></div>
+      <div class="summary-card"><div class="summary-top"><div class="icon-circle" style="background:#F0FDF4; color:#15803D">${icons.piggy}</div><span class="summary-label">Net Servet</span></div><div class="summary-value" style="color:${netWorth >= 0 ? '#117A39' : '#B91C1C'}">${fmt(netWorth)}</div><div class="summary-sub">Yatırım − Borç</div><button class="summary-cta" data-view="investments">${icons.plus}<span>Yatırım yönet</span></button></div>
+    </div>
+    <div class="two-col">${renderCategoryBreakdown('Gelir Kategorileri', incomeByCategory, p.totalIncome, '#117A39', '#10B981')}${renderCategoryBreakdown('Gider Kategorileri', expenseByCategory, p.totalExpense, '#B91C1C', '#EF4444')}</div>
+    <div class="section">
+      <div class="section-header"><h2 class="section-title">Son Hareketler</h2></div>
+      <div class="activity-table" style="border:none">
+        <div class="activity-header"><div style="flex:1">Tarih</div><div style="flex:1">Tip</div><div style="flex:2">Açıklama</div><div style="flex:1">Kategori</div><div style="flex:1; text-align:right">Tutar</div></div>
+        ${recent.length === 0 ? '<div class="empty-state">Henüz hareket yok. + Create butonuna basarak başla.</div>' : recent.map(r => `<div class="activity-row"><div style="flex:1">${r.date.split('-').reverse().join('/')}</div><div style="flex:1"><span class="badge ${r.kind === 'extra' ? 'badge-extra' : 'badge-regular'}">${r.kind === 'extra' ? 'Ekstra' : 'Sabit'}</span></div><div style="flex:2; color:#0070BA; font-weight:500">${escapeHtml(r.description)}</div><div style="flex:1; color:#6B7280; font-size:13px">${escapeHtml(r.category)}</div><div style="flex:1; text-align:right; font-weight:600; color:${r.type === 'income' ? '#117A39' : '#B91C1C'}">${r.type === 'income' ? '+' : '−'} ${fmt(r.amount)}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCategoryBreakdown(title, data, total, color, barColor) {
+  const entries = Object.entries(data).filter(([_, v]) => v.total > 0).sort((a, b) => b[1].total - a[1].total);
+  const max = Math.max(...entries.map(e => e[1].total), 1);
+  return `<div class="section" style="margin-bottom:0">
+    <div class="section-header"><h2 class="section-title">${title}</h2></div>
+    <div class="category-list">${entries.length === 0 ? '<div class="empty-state">Bu ay için veri yok</div>' : entries.map(([cat, val]) => {
+      const pct = total > 0 ? (val.total / total * 100) : 0;
+      const barPct = (val.total / max * 100);
+      return `<div class="category-row"><div class="category-top"><span class="category-name">${cat}${val.extra > 0 ? `<span class="badge badge-extra" style="font-size:10px; padding:2px 6px">${fmt(val.extra)} ekstra</span>` : ''}</span><div><span class="category-amount" style="color:${color}">${fmt(val.total)}</span><span class="category-pct">${pct.toFixed(1)}%</span></div></div><div class="bar-bg"><div class="bar-fill" style="width:${barPct}%; background:${barColor}"></div></div></div>`;
+    }).join('')}</div></div>`;
+}
+
+function renderList(kind) {
+  const isIncome = kind === 'income';
+  const items = isIncome ? state.income : state.expenses;
+  let filtered = items;
+  if (listFilter === 'regular') filtered = items.filter(x => (x.kind || 'regular') === 'regular');
+  else if (listFilter === 'extra') filtered = items.filter(x => x.kind === 'extra');
+  const sorted = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const allTotal = items.reduce((s, x) => s + x.amount, 0);
+  const regularTotal = items.filter(x => (x.kind || 'regular') === 'regular').reduce((s, x) => s + x.amount, 0);
+  const extraTotal = items.filter(x => x.kind === 'extra').reduce((s, x) => s + x.amount, 0);
+  const accent = isIncome ? '#117A39' : '#B91C1C';
+  const title = isIncome ? 'Gelirler' : 'Giderler';
+  return `<div class="content">
+    <div class="list-header"><div><h1 class="list-title">${title}</h1><div class="list-subtitle">${items.length} kayıt · Toplam <span style="color:${accent}; font-weight:600">${fmt(allTotal)}</span> · Sabit <span style="font-weight:600">${fmt(regularTotal)}</span> · Ekstra <span style="font-weight:600">${fmt(extraTotal)}</span></div></div><button class="primary-btn" data-action="${isIncome ? 'add-income' : 'add-expense'}">${icons.plusBig}<span>${isIncome ? 'Gelir Ekle' : 'Gider Ekle'}</span></button></div>
+    <div class="filter-row"><button class="filter-pill ${listFilter === 'all' ? 'active' : ''}" data-filter="all">Tümü (${items.length})</button><button class="filter-pill ${listFilter === 'regular' ? 'active' : ''}" data-filter="regular">Sabit (${items.filter(x => (x.kind || 'regular') === 'regular').length})</button><button class="filter-pill ${listFilter === 'extra' ? 'active' : ''}" data-filter="extra">Ekstra (${items.filter(x => x.kind === 'extra').length})</button></div>
+    <div class="activity-table">
+      <div class="activity-header"><div style="flex:1">Tarih</div><div style="flex:0.7">Tip</div><div style="flex:2">Açıklama</div><div style="flex:1.2">Kategori</div><div style="flex:1; text-align:right">Tutar</div><div style="width:80px"></div></div>
+      ${sorted.length === 0 ? '<div class="empty-state">Bu filtrede kayıt yok.</div>' : sorted.map(item => `<div class="activity-row"><div style="flex:1">${item.date.split('-').reverse().join('/')}</div><div style="flex:0.7"><span class="badge ${item.kind === 'extra' ? 'badge-extra' : 'badge-regular'}">${item.kind === 'extra' ? 'Ekstra' : 'Sabit'}</span></div><div style="flex:2"><div style="color:#0070BA; font-weight:500">${escapeHtml(item.description)}</div>${item.notes ? `<div style="font-size:12px; color:#6B7280; margin-top:2px">${escapeHtml(item.notes)}</div>` : ''}</div><div style="flex:1.2"><span class="category-tag">${escapeHtml(item.category)}</span></div><div style="flex:1; text-align:right; color:${accent}; font-weight:600">${isIncome ? '+' : '−'} ${fmt(item.amount)}</div><div style="width:80px" class="row-actions"><button class="row-action" data-action="edit-${kind}" data-id="${item.id}">${icons.edit}</button><button class="row-action" data-action="delete-${kind}" data-id="${item.id}">${icons.trash}</button></div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderDebts() {
+  const totalRemaining = state.debts.reduce((s, d) => s + (d.original - d.paid), 0);
+  const totalMonthly = state.debts.reduce((s, d) => s + (d.monthlyPayment || 0), 0);
+  return `<div class="content">
+    <div class="list-header"><div><h1 class="list-title">Borçlar</h1><div class="list-subtitle">${state.debts.length} borç · Kalan <span style="color:#B91C1C; font-weight:600">${fmt(totalRemaining)}</span> · Aylık <span style="font-weight:600">${fmt(totalMonthly)}</span></div></div><button class="primary-btn" data-action="add-debt">${icons.plusBig}<span>Borç Ekle</span></button></div>
+    <div class="activity-table">
+      <div class="activity-header"><div style="flex:2">Borç Adı</div><div style="flex:1.2">Alacaklı</div><div style="flex:1; text-align:right">Orijinal</div><div style="flex:1; text-align:right">Ödenen</div><div style="flex:1; text-align:right">Kalan</div><div style="flex:1; text-align:right">Aylık</div><div style="flex:1; text-align:right">Bitiş</div><div style="width:80px"></div></div>
+      ${state.debts.length === 0 ? '<div class="empty-state">Henüz borç eklenmemiş.</div>' : state.debts.map(d => {
+        const remaining = d.original - d.paid;
+        const monthsLeft = d.monthlyPayment > 0 ? remaining / d.monthlyPayment : 0;
+        const progressPct = d.original > 0 ? (d.paid / d.original * 100) : 0;
+        return `<div class="activity-row"><div style="flex:2"><div style="font-weight:500">${escapeHtml(d.name)}</div><div style="margin-top:6px; height:4px; background:#F0F2F5; border-radius:2px; overflow:hidden"><div style="width:${progressPct}%; height:100%; background:#0070BA"></div></div></div><div style="flex:1.2; color:#6B7280">${escapeHtml(d.creditor) || '—'}</div><div style="flex:1; text-align:right">${fmt(d.original)}</div><div style="flex:1; text-align:right; color:#117A39">${fmt(d.paid)}</div><div style="flex:1; text-align:right; color:#B91C1C; font-weight:600">${fmt(remaining)}</div><div style="flex:1; text-align:right">${fmt(d.monthlyPayment || 0)}</div><div style="flex:1; text-align:right; color:#6B7280">${monthsLeft > 0 ? monthsLeft.toFixed(1) + ' ay' : '—'}</div><div style="width:80px" class="row-actions"><button class="row-action" data-action="edit-debt" data-id="${d.id}">${icons.edit}</button><button class="row-action" data-action="delete-debt" data-id="${d.id}">${icons.trash}</button></div></div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function renderInvestments() {
+  const totalBalance = state.investments.reduce((s, i) => s + (i.balance || 0), 0);
+  const totalContributed = state.investments.reduce((s, i) => s + (i.contributed || 0), 0);
+  const totalGain = totalBalance - totalContributed;
+  const gainPct = totalContributed > 0 ? (totalGain / totalContributed * 100) : 0;
+  return `<div class="content">
+    <div class="list-header"><div><h1 class="list-title">Yatırım & Tasarruf</h1><div class="list-subtitle">${state.investments.length} hesap</div></div><button class="primary-btn" data-action="add-investment">${icons.plusBig}<span>Hesap Ekle</span></button></div>
+    <div class="mini-row" style="margin-bottom:24px">
+      <div class="mini-stat"><div class="mini-label">Toplam Bakiye</div><div class="mini-value">${fmtBig(totalBalance)}</div></div>
+      <div class="mini-stat"><div class="mini-label">Yatırılan</div><div class="mini-value">${fmtBig(totalContributed)}</div></div>
+      <div class="mini-stat"><div class="mini-label">Kâr/Zarar</div><div class="mini-value" style="color:${totalGain >= 0 ? '#117A39' : '#B91C1C'}">${totalGain >= 0 ? '+' : ''}${fmtBig(totalGain)}</div></div>
+      <div class="mini-stat"><div class="mini-label">Getiri %</div><div class="mini-value" style="color:${gainPct >= 0 ? '#117A39' : '#B91C1C'}">${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(1)}%</div></div>
+    </div>
+    <div class="activity-table">
+      <div class="activity-header"><div style="flex:2">Hesap</div><div style="flex:1">Tip</div><div style="flex:1; text-align:right">Yatırılan</div><div style="flex:1; text-align:right">Mevcut</div><div style="flex:1; text-align:right">Kâr/Zarar</div><div style="flex:1; text-align:right">%</div><div style="width:80px"></div></div>
+      ${state.investments.length === 0 ? '<div class="empty-state">Henüz hesap eklenmemiş.</div>' : state.investments.map(i => {
+        const gain = (i.balance || 0) - (i.contributed || 0);
+        const pct = i.contributed > 0 ? (gain / i.contributed * 100) : 0;
+        return `<div class="activity-row"><div style="flex:2"><div style="font-weight:500">${escapeHtml(i.name)}</div>${i.notes ? `<div style="font-size:12px; color:#6B7280; margin-top:2px">${escapeHtml(i.notes)}</div>` : ''}</div><div style="flex:1"><span class="category-tag">${escapeHtml(i.type)}</span></div><div style="flex:1; text-align:right">${fmt(i.contributed || 0)}</div><div style="flex:1; text-align:right; font-weight:600">${fmt(i.balance || 0)}</div><div style="flex:1; text-align:right; color:${gain >= 0 ? '#117A39' : '#B91C1C'}; font-weight:600">${gain >= 0 ? '+' : ''}${fmt(gain)}</div><div style="flex:1; text-align:right; color:${pct >= 0 ? '#117A39' : '#B91C1C'}">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</div><div style="width:80px" class="row-actions"><button class="row-action" data-action="edit-investment" data-id="${i.id}">${icons.edit}</button><button class="row-action" data-action="delete-investment" data-id="${i.id}">${icons.trash}</button></div></div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function renderProfile() {
+  return `<div class="content">
+    <div class="list-header"><div><h1 class="list-title">Profil</h1><div class="list-subtitle">Hesap bilgilerini güncelle</div></div></div>
+    <div class="section" style="max-width:520px">
+      <form id="profile-form" onsubmit="event.preventDefault(); saveProfile();">
+        <div class="field"><label class="field-label">Email (değiştirilemez)</label><input type="email" class="input" value="${escapeHtml(session?.user?.email || '')}" disabled style="background:#F8FAFC; color:#6B7280" /></div>
+        <div class="field"><label class="field-label">Tam İsim</label><input type="text" class="input" name="fullName" value="${escapeHtml(profile?.full_name || '')}" placeholder="Asaf Aksoy" /></div>
+        <button type="submit" class="primary-btn" style="margin-top:8px">Kaydet</button>
+      </form>
+    </div>
+  </div>`;
+}
+
+function renderModal() {
+  const { type, item } = modal;
+  const editing = !!item;
+  const today = new Date().toISOString().split('T')[0];
+  let titleText = '', body = '';
+  if (type === 'income' || type === 'expense') {
+    const isIncome = type === 'income';
+    titleText = editing ? (isIncome ? 'Geliri Düzenle' : 'Gideri Düzenle') : (isIncome ? 'Yeni Gelir' : 'Yeni Gider');
+    const f = item || { date: today, description: '', category: isIncome ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0], amount: '', kind: 'regular', notes: '' };
+    const cats = isIncome ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    const currentKind = f.kind || 'regular';
+    body = `<div class="field"><label class="field-label">Tip</label><div class="toggle-pill"><button type="button" class="toggle-option ${currentKind === 'regular' ? 'active' : ''}" data-toggle-kind="regular">Sabit</button><button type="button" class="toggle-option ${currentKind === 'extra' ? 'active' : ''}" data-toggle-kind="extra">Ekstra</button></div><input type="hidden" name="kind" value="${currentKind}" /></div>
+      <div class="field"><label class="field-label">Tarih</label><input type="date" class="input" name="date" value="${escapeHtml(f.date)}" required /></div>
+      <div class="field"><label class="field-label">Açıklama</label><input type="text" class="input" name="description" value="${escapeHtml(f.description)}" placeholder="Ör. Email Marketing Client" required /></div>
+      <div class="field"><label class="field-label">Kategori</label><select class="input" name="category">${cats.map(c => `<option value="${c}" ${f.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label class="field-label">Tutar (£)</label><input type="number" step="0.01" class="input" name="amount" value="${escapeHtml(f.amount)}" placeholder="0.00" required /></div>
+      <div class="field"><label class="field-label">Notlar (opsiyonel)</label><textarea class="input" name="notes">${escapeHtml(f.notes)}</textarea></div>`;
+  } else if (type === 'debt') {
+    titleText = editing ? 'Borcu Düzenle' : 'Yeni Borç';
+    const f = item || { name: '', creditor: '', original: '', paid: '0', monthlyPayment: '', notes: '' };
+    body = `<div class="field"><label class="field-label">Borç Adı</label><input type="text" class="input" name="name" value="${escapeHtml(f.name)}" placeholder="Ör. Kredi Kartı" required /></div>
+      <div class="field"><label class="field-label">Alacaklı (opsiyonel)</label><input type="text" class="input" name="creditor" value="${escapeHtml(f.creditor)}" placeholder="Banka adı vs." /></div>
+      <div class="field"><label class="field-label">Orijinal Tutar (£)</label><input type="number" step="0.01" class="input" name="original" value="${escapeHtml(f.original)}" placeholder="0.00" required /></div>
+      <div class="field"><label class="field-label">Şu Ana Kadar Ödenen (£)</label><input type="number" step="0.01" class="input" name="paid" value="${escapeHtml(f.paid)}" placeholder="0.00" /></div>
+      <div class="field"><label class="field-label">Aylık Ödeme (£)</label><input type="number" step="0.01" class="input" name="monthlyPayment" value="${escapeHtml(f.monthlyPayment)}" placeholder="0.00" /></div>
+      <div class="field"><label class="field-label">Notlar (opsiyonel)</label><textarea class="input" name="notes">${escapeHtml(f.notes)}</textarea></div>`;
+  } else if (type === 'investment') {
+    titleText = editing ? 'Hesabı Düzenle' : 'Yeni Yatırım Hesabı';
+    const f = item || { name: '', type: INVESTMENT_TYPES[0], contributed: '', balance: '', notes: '' };
+    body = `<div class="field"><label class="field-label">Hesap Adı</label><input type="text" class="input" name="name" value="${escapeHtml(f.name)}" placeholder="Ör. Vanguard ISA, Trading 212, Bitcoin" required /></div>
+      <div class="field"><label class="field-label">Tip</label><select class="input" name="type">${INVESTMENT_TYPES.map(t => `<option value="${t}" ${f.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label class="field-label">Toplam Yatırılan (£)</label><input type="number" step="0.01" class="input" name="contributed" value="${escapeHtml(f.contributed)}" placeholder="Şimdiye kadar kendi paranla koyduğun" required /></div>
+      <div class="field"><label class="field-label">Mevcut Bakiye (£)</label><input type="number" step="0.01" class="input" name="balance" value="${escapeHtml(f.balance)}" placeholder="Şu anki değeri" required /></div>
+      <div class="field"><label class="field-label">Notlar (opsiyonel)</label><textarea class="input" name="notes">${escapeHtml(f.notes)}</textarea></div>`;
+  }
+  return `<div class="modal-bg" data-modal-bg><div class="modal" data-stop-propagation>
+    <div class="modal-header"><h2 class="modal-title">${titleText}</h2><button class="icon-btn" data-action="close-modal">${icons.x}</button></div>
+    <div class="modal-body"><form id="modal-form" onsubmit="event.preventDefault(); saveModal();">${body}</form></div>
+    <div class="modal-footer"><button class="secondary-btn" data-action="close-modal">İptal</button><button class="primary-btn" data-action="save-modal">${editing ? 'Güncelle' : 'Kaydet'}</button></div>
+  </div></div>`;
+}
+
+function attachAuthEvents() {
+  document.querySelectorAll('[data-action="switch-auth"]').forEach(el => {
+    el.addEventListener('click', () => { authMode = authMode === 'login' ? 'register' : 'login'; authError = ''; render(); });
+  });
+}
+
+async function submitAuth() {
+  const form = document.getElementById('auth-form');
+  if (!form) return;
+  const obj = Object.fromEntries(new FormData(form).entries());
+  authLoading = true; authError = ''; render();
+  try {
+    if (authMode === 'register') {
+      if (!obj.fullName || !obj.email || !obj.password) throw new Error('Tüm alanları doldur.');
+      const signUpResult = await signUp(obj.email, obj.password, obj.fullName);
+      // After signUp with email confirm OFF, signUpResult.session should exist.
+      // If not (e.g. confirm still on), fall back to signIn.
+      if (signUpResult && signUpResult.session) {
+        session = signUpResult.session;
+      } else {
+        const signInResult = await signIn(obj.email, obj.password);
+        session = signInResult && signInResult.session ? signInResult.session : null;
+      }
+    } else {
+      const signInResult = await signIn(obj.email, obj.password);
+      session = signInResult && signInResult.session ? signInResult.session : null;
+    }
+    // Final safety: if session still null, ask Supabase directly.
+    if (!session) {
+      const { data: { session: existing } } = await sb.auth.getSession();
+      session = existing;
+    }
+    if (!session) throw new Error('Oturum başlatılamadı. Email doğrulaması gerekiyor olabilir.');
+    isLoading = true; render();
+    await loadAllData();
+    isLoading = false; authLoading = false; render();
+  } catch (e) {
+    authError = e.message || 'Bir hata oluştu.';
+    authLoading = false; render();
+  }
+}
+
+function attachEvents() {
+  document.querySelectorAll('[data-view]').forEach(el => {
+    el.addEventListener('click', () => { view = el.dataset.view; listFilter = 'all'; avatarMenuOpen = false; render(); });
+  });
+  document.querySelectorAll('[data-period]').forEach(el => {
+    el.addEventListener('change', (e) => { period[el.dataset.period] = parseInt(e.target.value); render(); });
+  });
+  document.querySelectorAll('[data-filter]').forEach(el => {
+    el.addEventListener('click', () => { listFilter = el.dataset.filter; render(); });
+  });
+  document.querySelectorAll('[data-toggle-kind]').forEach(el => {
+    el.addEventListener('click', () => {
+      const v = el.dataset.toggleKind;
+      document.querySelectorAll('[data-toggle-kind]').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      const hidden = document.querySelector('input[name="kind"]');
+      if (hidden) hidden.value = v;
+    });
+  });
+  document.querySelectorAll('[data-modal-bg]').forEach(el => {
+    el.addEventListener('click', (e) => { if (e.target === el) { modal = null; render(); } });
+  });
+  document.querySelectorAll('[data-stop-propagation]').forEach(el => {
+    el.addEventListener('click', (e) => e.stopPropagation());
+  });
+  document.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', async (e) => {
+      const action = el.dataset.action;
+      const id = el.dataset.id;
+      if (action === 'open-create' || action === 'add-income') { modal = { type: 'income' }; render(); }
+      else if (action === 'add-expense') { modal = { type: 'expense' }; render(); }
+      else if (action === 'add-debt') { modal = { type: 'debt' }; render(); }
+      else if (action === 'add-investment') { modal = { type: 'investment' }; render(); }
+      else if (action === 'edit-income') { modal = { type: 'income', item: state.income.find(x => x.id === id) }; render(); }
+      else if (action === 'edit-expense') { modal = { type: 'expense', item: state.expenses.find(x => x.id === id) }; render(); }
+      else if (action === 'edit-debt') { modal = { type: 'debt', item: state.debts.find(x => x.id === id) }; render(); }
+      else if (action === 'edit-investment') { modal = { type: 'investment', item: state.investments.find(x => x.id === id) }; render(); }
+      else if (action === 'delete-income' || action === 'delete-expense') {
+        if (confirm('Silinsin mi?')) {
+          try {
+            await deleteRow('transactions', id);
+            if (action === 'delete-income') state.income = state.income.filter(x => x.id !== id);
+            else state.expenses = state.expenses.filter(x => x.id !== id);
+            showIndicator('✓ Silindi'); render();
+          } catch (err) { showIndicator('Silinemedi: ' + err.message, true); }
+        }
+      }
+      else if (action === 'delete-debt') {
+        if (confirm('Silinsin mi?')) {
+          try { await deleteRow('debts', id); state.debts = state.debts.filter(x => x.id !== id); showIndicator('✓ Silindi'); render(); }
+          catch (err) { showIndicator('Silinemedi: ' + err.message, true); }
+        }
+      }
+      else if (action === 'delete-investment') {
+        if (confirm('Silinsin mi?')) {
+          try { await deleteRow('investments', id); state.investments = state.investments.filter(x => x.id !== id); showIndicator('✓ Silindi'); render(); }
+          catch (err) { showIndicator('Silinemedi: ' + err.message, true); }
+        }
+      }
+      else if (action === 'close-modal') { modal = null; render(); }
+      else if (action === 'save-modal') { saveModal(); }
+      else if (action === 'toggle-avatar-menu') { e.stopPropagation(); avatarMenuOpen = !avatarMenuOpen; render(); }
+      else if (action === 'open-profile') { view = 'profile'; avatarMenuOpen = false; render(); }
+      else if (action === 'logout') { await signOut(); }
+    });
+  });
+  if (avatarMenuOpen) {
+    setTimeout(() => { document.addEventListener('click', closeAvatarMenuOnOutside, { once: true }); }, 0);
+  }
+}
+
+function closeAvatarMenuOnOutside(e) {
+  if (!e.target.closest('.avatar-menu') && !e.target.closest('[data-action="toggle-avatar-menu"]')) {
+    avatarMenuOpen = false; render();
+  }
+}
+
+async function saveModal() {
+  const form = document.getElementById('modal-form');
+  if (!form) return;
+  const obj = Object.fromEntries(new FormData(form).entries());
+  const { type, item } = modal;
+  try {
+    if (type === 'income' || type === 'expense') {
+      if (!obj.description || !obj.amount) { alert('Açıklama ve tutar gerekli.'); return; }
+      const newItem = { date: obj.date, description: obj.description, category: obj.category, amount: parseFloat(obj.amount) || 0, kind: obj.kind || 'regular', notes: obj.notes || '' };
+      const saved = await saveTransaction(newItem, type, item ? item.id : null);
+      if (type === 'income') state.income = item ? state.income.map(x => x.id === item.id ? saved : x) : [saved, ...state.income];
+      else state.expenses = item ? state.expenses.map(x => x.id === item.id ? saved : x) : [saved, ...state.expenses];
+    } else if (type === 'debt') {
+      if (!obj.name || !obj.original) { alert('Borç adı ve orijinal tutar gerekli.'); return; }
+      const newItem = { name: obj.name, creditor: obj.creditor || '', original: parseFloat(obj.original) || 0, paid: parseFloat(obj.paid) || 0, monthlyPayment: parseFloat(obj.monthlyPayment) || 0, notes: obj.notes || '' };
+      const saved = await saveDebt(newItem, item ? item.id : null);
+      state.debts = item ? state.debts.map(x => x.id === item.id ? saved : x) : [saved, ...state.debts];
+    } else if (type === 'investment') {
+      if (!obj.name || obj.contributed === '' || obj.balance === '') { alert('Hesap adı, yatırılan ve mevcut bakiye gerekli.'); return; }
+      const newItem = { name: obj.name, type: obj.type, contributed: parseFloat(obj.contributed) || 0, balance: parseFloat(obj.balance) || 0, notes: obj.notes || '' };
+      const saved = await saveInvestment(newItem, item ? item.id : null);
+      state.investments = item ? state.investments.map(x => x.id === item.id ? saved : x) : [saved, ...state.investments];
+    }
+    showIndicator(); modal = null; render();
+  } catch (e) {
+    alert('Kaydedilemedi: ' + e.message);
+  }
+}
+
+async function saveProfile() {
+  const form = document.getElementById('profile-form');
+  if (!form) return;
+  const obj = Object.fromEntries(new FormData(form).entries());
+  try {
+    const { data, error } = await sb.from('profiles').upsert({ id: session.user.id, full_name: obj.fullName || null }).select().single();
+    if (error) throw error;
+    profile = data;
+    showIndicator('✓ Profil güncellendi');
+    render();
+  } catch (e) {
+    showIndicator('Güncellenemedi: ' + e.message, true);
+  }
+}
+
+window.submitAuth = submitAuth;
+window.saveModal = saveModal;
+window.saveProfile = saveProfile;
+
+async function init() {
+  const { data: { session: existingSession } } = await sb.auth.getSession();
+  session = existingSession;
+  if (session) await loadAllData();
+  isLoading = false;
+  render();
+  sb.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') {
+      session = null; profile = null; state = { income: [], expenses: [], debts: [], investments: [] };
+      render();
+    }
+  });
+}
+init();
+</script>
+</body>
+</html>
